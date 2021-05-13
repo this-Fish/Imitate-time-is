@@ -4,63 +4,270 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="this-fish">
     <title>Document</title>
 
     <script>
+        var view_mode = 1;
+
+        document.onkeydown = function (e) {    //對整個頁面監聽  
+            var keyNum = window.event ? e.keyCode : e.which;       //獲取被按下的鍵值  
+            //判斷如果使用者按下了空格鍵(keycode=32)， 
+            switch (keyNum) {
+                case 192:
+                    changeColor();
+                    break;
+                case 32:
+                    document.body.style.cursor = "default";
+                    break;
+                case 49:
+                    view_mode = 1;
+                    // 加回秒數
+                    var NowDate = new Date();
+                    var h = NowDate.getHours() > 9 ? NowDate.getHours() : "0" + NowDate.getHours();
+                    var i = NowDate.getMinutes() > 9 ? NowDate.getMinutes() : "0" + NowDate.getMinutes();
+                    var s = NowDate.getSeconds() > 9 ? NowDate.getSeconds() : "0" + NowDate.getSeconds();
+                    document.getElementById("showbox").innerHTML = h + ':' + i + ':' + s;
+                    document.title = document.getElementById("showbox").innerHTML;
+                    document.getElementById("showbox").style.fontSize = "18.5vw"
+                    break;
+                case 50:
+                    view_mode = 2;
+                    // 扣去秒數
+                    document.getElementById("showbox").innerHTML = document.getElementById("showbox").innerHTML.substr(0, 5);
+                    document.title = document.getElementById("showbox").innerHTML;
+                    document.getElementById("showbox").style.fontSize = "25vw"
+                    break;
+                case 51:
+                    if (color_mod != 3) {
+                        color_mod = 3;
+                    } else {
+                        color_mod = 2;
+                    }
+                    changeColor();
+
+                    break;
+                case 70:
+                    changeFullScreen()
+                    break;
+            }
+        }
+
+        document.onkeyup = function (e) {    //對整個頁面監聽  
+            var keyNum = window.event ? e.keyCode : e.which;       //獲取被按下的鍵值  
+            //判斷如果使用者按下了空格鍵(keycode=32)，  
+            if (keyNum == 32) {
+                document.body.style.cursor = "none";
+            }
+        }
+
+        function getValue(varname) {
+            var url = window.location.href;
+            var qparts = url.split("?");
+            if (qparts.length == 2) {
+                var parts = qparts[1].split("&");
+                for (i = 0; i < parts.length; i++) {
+                    var parts2 = parts[i].split("=");
+                    if (parts2[0] == varname) {
+                        value = parts2[1];
+                    }
+                }
+                value = unescape(value);
+                value.replace(/\+/g, " ");
+                return value;
+            } else {
+                return "";
+            }
+
+        }
+
+        function setView() {
+            setBtn();
+            setColor();
+            setViewMod();
+        }
+
+        function setBtn() {
+            if (getValue("little") == "1") {
+                if (document.getElementById("btn") != null) {
+                    document.getElementById("container").removeChild(document.getElementById("btn"));
+                }
+            }
+        }
+
+        function setColor() {
+            if (getValue("c_mod") == "1") {
+                document.getElementById('container').style.backgroundColor = "#3e3e44";
+                document.getElementById('showbox').style.color = "white";
+                color_mod = 1;
+            } else if (getValue("c_mod") == "2") {
+                document.getElementById('container').style.backgroundColor = "white";
+                document.getElementById('showbox').style.color = "#3e3e44";
+                color_mod = 2;
+            } else if (getValue("c_mod") == "3") {
+                document.getElementById('container').style.backgroundColor = "black";
+                document.getElementById('showbox').style.color = "#3f3f3f";
+                color_mod = 3;
+            }
+        }
+
+        function setViewMod() {
+            if (getValue("v_mod") == "1") {
+                view_mode = 1;
+            } else if (getValue("v_mod") == "2") {
+                view_mode = 2;
+                // 扣去秒數
+                document.getElementById("showbox").innerHTML = document.getElementById("showbox").innerHTML.substr(0, 5);
+                document.title = document.getElementById("showbox").innerHTML;
+                document.getElementById("showbox").style.fontSize = "25vw"
+            }
+        }
+
         function ShowTime() {
             var NowDate = new Date();
             var h = NowDate.getHours() > 9 ? NowDate.getHours() : "0" + NowDate.getHours();
             var i = NowDate.getMinutes() > 9 ? NowDate.getMinutes() : "0" + NowDate.getMinutes();
             var s = NowDate.getSeconds() > 9 ? NowDate.getSeconds() : "0" + NowDate.getSeconds();
 
-            document.getElementById('showbox').innerHTML = h + ':' + i + ':' + s;
-            document.title = h + ':' + i + ':' + s;
+            var time_text = "";
+
+            if (view_mode == 1) {
+                time_text = h + ':' + i + ':' + s;
+            } else if (view_mode == 2) {
+                time_text = h + ':' + i;
+            }
+            document.getElementById('showbox').innerHTML = time_text;
+            document.title = time_text;
+
             setTimeout('ShowTime()', 1000);
         }
-        
-        var color_mod = 0;
+
+        var color_mod = 1;
         function changeColor() {
-            if ( color_mod == 0 ) {
+            btn = document.getElementById('btn');
+            if (color_mod == 1) {
+                document.getElementById('container').style.backgroundColor = "white";
+                if (btn != null) {
+                    btn.style.color = "white";
+                }
+                document.getElementById('showbox').style.color = "#3e3e44";
+                color_mod = 2;
+            } else if (color_mod == 2) {
                 document.getElementById('container').style.backgroundColor = "#3e3e44";
+                if (btn != null) {
+                    btn.style.color = "#3e3e44";
+                }
                 document.getElementById('showbox').style.color = "white";
                 color_mod = 1;
-            } else {
-                document.getElementById('container').style.backgroundColor = "white";
-                document.getElementById('showbox').style.color = "#3e3e44";
-                color_mod = 0;
+            } else if (color_mod == 3) {
+                document.getElementById('container').style.backgroundColor = "black";
+                if (btn != null) {
+                    btn.style.color = "black";
+                }
+                document.getElementById('showbox').style.color = "#3f3f3f";
             }
         }
+
+        function Popup() {
+            window.open("index.html?little=1&c_mod=" + color_mod + "&v_mod=" + view_mode, "", "resizable=1,height=200,width=400");
+            // if (document.getElementById("btn") != null) {
+            //     document.getElementById("container").removeChild(document.getElementById("btn"));
+            // }
+        }
+
+        // 进入全屏
+        function full() {
+            var docElm = document.documentElement;
+            //W3C 
+            if (docElm.requestFullscreen) {
+                docElm.requestFullscreen();
+            }
+            //FireFox 
+            else if (docElm.mozRequestFullScreen) {
+                docElm.mozRequestFullScreen();
+            }
+            //Chrome等 
+            else if (docElm.webkitRequestFullScreen) {
+                docElm.webkitRequestFullScreen();
+            }
+            //IE11
+            else if (elem.msRequestFullscreen) {
+                elem.msRequestFullscreen();
+            }
+            full_mod = true;
+        }
+
+        // 退出全屏
+        function exitFullscreen() {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+            else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
+            }
+            else if (document.webkitCancelFullScreen) {
+                document.webkitCancelFullScreen();
+            }
+            else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+            full_mod = false;
+        }
+
+        var full_mod = false;
+        function changeFullScreen() {
+
+            if (full_mod == false) {
+                full();
+            } else {
+                exitFullscreen();
+            }
+        }
+
     </script>
     <style>
         html,
         body {
             height: 100%;
             margin: 0px;
+            background: #3e3e44;
+            cursor: none;
         }
 
         #container {
             height: 100%;
-            background: #3e3e44;
         }
 
         #showbox {
-            height: 100%;
+            height: 95%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size:18vw;
+            font-size: 18.5vw;
             /* font-size: 267px; */
-            font-family: Timeis,'Arial Black','Arial-BoldMT','Arial Bold',Arial,Helvetica,sans-serif;
+            font-family: Timeis, 'Arial Black', 'Arial-BoldMT', 'Arial Bold', Arial, Helvetica, sans-serif;
             color: white;
+        }
+
+        #btn {
+            cursor: pointer;
+            position: relative;
+            font-size: 1vw;
+            color: #3e3e44;
         }
     </style>
 </head>
 
-<body onload="ShowTime()">
+<body onload="ShowTime(), setView()">
+
     <div id="container">
-        <span id="showbox" onClick="changeColor()">
+        <span id="btn" onClick="Popup()">
+            小視窗
+        </span>
+        <span id="showbox" onClick="changeColor()" ondblclick="changeFullScreen()">
             00:00:00
-        </span></div>
+        </span>
+    </div>
 </body>
 
 </html>
